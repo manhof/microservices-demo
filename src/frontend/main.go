@@ -23,6 +23,8 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+
+	// "contrib.go.opencensus.io/exporter/jaeger"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -33,6 +35,8 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
@@ -131,6 +135,8 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "User-agent: *\nDisallow: /") })
 	r.HandleFunc("/_healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
+	r.Path("/metrics").Handler(promhttp.Handler())
+	//r.HandleFunc("/metrics", promhttp.Handler())
 
 	var handler http.Handler = r
 	handler = &logHandler{log: log, next: handler} // add logging
